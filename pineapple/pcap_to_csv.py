@@ -14,27 +14,30 @@ if __name__ == "__main__":
         )
 
         for ts, buf in pcap:
-            eth = dpkt.ethernet.Ethernet(buf)
-            ip = eth.data
-            if not isinstance(ip, dpkt.ip.IP):
+            try:
+                eth = dpkt.ethernet.Ethernet(buf)
+                ip = eth.data
+                if not isinstance(ip, dpkt.ip.IP):
+                    continue
+                src_ip = socket.inet_ntoa(ip.src)
+                dst_ip = socket.inet_ntoa(ip.dst)
+                protocol = ip.p
+
+                if isinstance(ip.data, dpkt.tcp.TCP):
+                    src_port = ip.data.sport
+                    dst_port = ip.data.dport
+                    packet_size = len(ip.data.data)
+                    print(
+                        f"{ts},IP,{src_ip},{src_port},{dst_ip},{dst_port},{protocol},{packet_size}"
+                    )
+
+                elif isinstance(ip.data, dpkt.udp.UDP):
+                    src_port = ip.data.sport
+                    dst_port = ip.data.dport
+                    packet_size = len(ip.data.data)
+                    print(
+                        f"{ts},IP,{src_ip},{src_port},{dst_ip},{dst_port},{protocol},{packet_size}"
+                    )
+
+            except:
                 continue
-            src_ip = socket.inet_ntoa(ip.src)
-            dst_ip = socket.inet_ntoa(ip.dst)
-            protocol = ip.p
-
-            if isinstance(ip.data, dpkt.tcp.TCP):
-                src_port = ip.data.sport
-                dst_port = ip.data.dport
-                packet_size = len(ip.data.data)
-                print(
-                    f"{ts},IP,{src_ip},{src_port},{dst_ip},{dst_port},{protocol},{packet_size}"
-                )
-
-            elif isinstance(ip.data, dpkt.udp.UDP):
-                src_port = ip.data.sport
-                dst_port = ip.data.dport
-                packet_size = len(ip.data.data)
-                print(
-                    f"{ts},IP,{src_ip},{src_port},{dst_ip},{dst_port},{protocol},{packet_size}"
-                )
-
